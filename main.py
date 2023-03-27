@@ -6,7 +6,7 @@ import time
 kp = 0.5
 ki = 0.1
 kd = 0.2
-setpoint = 300  # altura de pouso desejada em centímetros
+setpoint = 30  # altura de pouso desejada em centímetros
 
 # Cria o objeto PIDController
 pid = PIDController(kp, ki, kd, setpoint)
