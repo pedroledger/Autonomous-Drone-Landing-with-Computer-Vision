@@ -1,32 +1,17 @@
-import cv2
-import numpy as np
+def detect_object(frame, roi_x, roi_y, roi_w, roi_h):
+    # Converte o frame para escala de cinza
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-# Carregar a imagem da placa de pouso:
-plate = cv2.imread('placa_de_pouso.jpg')
+    # Define o classificador Haar Cascade
+    cascade = cv2.CascadeClassifier("haarcascade_stop_sign.xml")
 
-# Converter a imagem para escala de cinza e aplicar um filtro de suavização:
-gray = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Detecta as regiões da imagem correspondentes à placa
+    objects = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-# Definir os parâmetros do algoritmo de detecção de bordas Canny:
-edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    # Verifica se há objetos detectados dentro da ROI definida
+    for (x, y, w, h) in objects:
+        if x > roi_x and y > roi_y and x + w < roi_x + roi_w and y + h < roi_y + roi_h:
+            return True
 
-# Aplicar uma transformada de Hough para detectar as linhas presentes na imagem:
-lines = cv2.HoughLines(edges, 1, np.pi/180, 100)
-
-# Desenhar as linhas detectadas na imagem original:
-for rho, theta in lines[0]:
-    a = np.cos(theta)
-    b = np.sin(theta)
-    x0 = a * rho
-    y0 = b * rho
-    x1 = int(x0 + 1000 * (-b))
-    y1 = int(y0 + 1000 * (a))
-    x2 = int(x0 - 1000 * (-b))
-    y2 = int(y0 - 1000 * (a))
-    cv2.line(plate, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
-# Mostrar a imagem com as linhas detectadas:
-cv2.imshow('plate', plate)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # Se nenhum objeto foi detectado dentro da ROI, retorna False
+    return False
